@@ -3,6 +3,7 @@
 #include "cd.h"
 #include "echo.h"
 #include "pwd.h"
+#include "ls.h"
 
 void c_shell(){
 
@@ -129,6 +130,9 @@ void check_command(char cwd[]){
 	}
 	else if(!strcmp(argv[0], "pwd")){
 		pwd_command(argv);
+	}
+	else if(!strcmp(argv[0], "ls")){
+		list_files(argv);
 	}
 }
 

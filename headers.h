@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <limits.h>
+#include <dirent.h>
+#include <errno.h>
 
 #define	MAX_SIZE_CMD	256
 #define	MAX_SIZE_ARG	16
