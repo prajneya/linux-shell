@@ -49,9 +49,9 @@ void c_shell(){
 void get_command(){
 	// get command from user
 	// NEED TO ADD ERROR HANDLING
-	char hostname[HOST_NAME_MAX];
-	char username[LOGIN_NAME_MAX];
-	char cwd[PATH_MAX];
+	char hostname[HOST_NAME_MAX]  = { '\0' };
+	char username[LOGIN_NAME_MAX]  = { '\0' };
+	char cwd[PATH_MAX]  = { '\0' };
 	gethostname(hostname, HOST_NAME_MAX);
 	getlogin_r(username, LOGIN_NAME_MAX);
 	getcwd(cwd, sizeof(cwd));
@@ -71,7 +71,7 @@ void get_command(){
 
 	if(cwd_len>=home_len){
 		// printf("%d %d, %d", cwd_len, home_len, cwd_len<home_len);
-		char wd[PATH_MAX];
+		char wd[PATH_MAX] = { '\0' };
 		int k = 0;
 		for(int j = ii; j<strlen(cwd) || k<strlen(wd); j++){
 			wd[k] = cwd[j];

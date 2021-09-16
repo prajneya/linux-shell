@@ -6,7 +6,7 @@ void pwd_command(char *argv[]){
 		printf("Too many arguments!\n");
 	}
 	else{
-        char cwd[PATH_MAX];
+        char cwd[PATH_MAX] = { '\0' };
         getcwd(cwd, sizeof(cwd));
 
         int ii;
@@ -20,7 +20,7 @@ void pwd_command(char *argv[]){
         int home_len = strlen(home_dir);
 
         if(cwd_len>=home_len){
-            char wd[PATH_MAX];
+            char wd[PATH_MAX] = { '\0' };
             int k = 0;
             for(int j = ii; j<strlen(cwd) || k<strlen(wd); j++){
                 wd[k] = cwd[j];

@@ -2,7 +2,7 @@
 #include "cd.h"
 
 void change_directory(char *argv[], char prev_dir[]){
-    char cwd[PATH_MAX];
+    char cwd[PATH_MAX] = { '\0' };
     getcwd(cwd, sizeof(cwd));
     // printf("%s %s\n", cwd, prev_dir);
 
