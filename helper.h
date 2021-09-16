@@ -3,7 +3,7 @@
 
 void get_command();								// get command string from the user
 void convert_command();						// convert the command string to the required format by execvp()
-void check_command();
+int check_command();
 void c_shell();								// to start the shell
 void log_handle(int sig);			// signal handler to add log statements
 

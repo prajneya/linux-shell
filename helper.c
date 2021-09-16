@@ -33,15 +33,20 @@ void c_shell(){
 			// int test = execvp(argv[0], argv);
 			// printf("%d", test);
 			// printf("%s", argv[1]);
-			exit(0);
+			if(!check_command()){
+				execvp(argv[0], argv);
+			}
 
 		}
 		else{
 			// printf("hello from parent\n");
 			// wait for the command to finish if "&" is not present
-
-			check_command();
-			if(argv[i]==NULL) waitpid(pid, NULL, 0);
+			if(argv[i]==NULL){
+				waitpid(pid, NULL, 0);
+			}
+			else{
+				printf("%d\n", pid);
+			}
 		}
 	}
 }
@@ -119,20 +124,27 @@ void convert_command(){
 	//printf("%d\n", i);
 }
 
-void check_command(char cwd[]){
+int check_command(char cwd[]){
 	// printf("CHECKING COMMAND %s", argv[0]);
 	if(!strcmp(argv[0], "cd")){
 		char prev_dir[PATH_MAX];
 		change_directory(argv, prev_dir);
+		return 1;
 	}
 	else if(!strcmp(argv[0], "echo")){
 		echo_command(argv);
+		return 1;
 	}
 	else if(!strcmp(argv[0], "pwd")){
 		pwd_command(argv);
+		return 1;
 	}
 	else if(!strcmp(argv[0], "ls")){
 		list_files(argv);
+		return 1;
+	}
+	else{
+		return 0;
 	}
 }
 
