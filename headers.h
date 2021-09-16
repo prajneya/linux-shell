@@ -15,6 +15,7 @@
 #include <time.h>
 #include <grp.h>
 #include <pwd.h>
+#include <fcntl.h>
 
 #define	MAX_SIZE_CMD	256
 #define	MAX_SIZE_ARG	16

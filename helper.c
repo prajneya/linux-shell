@@ -4,6 +4,7 @@
 #include "echo.h"
 #include "pwd.h"
 #include "ls.h"
+#include "pinfo.h"
 
 void c_shell(){
 
@@ -141,6 +142,10 @@ int check_command(char cwd[]){
 	}
 	else if(!strcmp(argv[0], "ls")){
 		list_files(argv);
+		return 1;
+	}
+	else if(!strcmp(argv[0], "pinfo")){
+		pinfo(argv);
 		return 1;
 	}
 	else{
