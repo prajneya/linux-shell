@@ -6,9 +6,9 @@ void echo_command(char *argv[]){
 		printf("\n");
 	}
 	else{
-        for(i = 1; argv[i]!=NULL; i++){
-            if(argv[i]){
-                printf("%s ", argv[i]);
+        for(int ii = 1; argv[ii]!=NULL; ii++){
+            if(argv[ii]){
+                printf("%s ", argv[ii]);
             }
         }
         printf("\n");    

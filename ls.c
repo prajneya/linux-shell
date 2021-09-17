@@ -144,13 +144,14 @@ void list_files(char *argv[]){
             if(path[0]=='~'){
                 char newpath[PATH_MAX];
                 // printf("%s\n", newpath);
-                for(i = 0; i<strlen(home_dir); i++){
-                    newpath[i] = home_dir[i];
+                int ii;
+                for(ii = 0; ii<strlen(home_dir); i++){
+                    newpath[ii] = home_dir[ii];
                     // printf("%c", newpath[i]);
                 }
                 // printf("\n%ld", strlen(path));
-                for(int j = 1; j<strlen(path); j++, i++){
-                    newpath[i] = path[j];
+                for(int j = 1; j<strlen(path); j++, ii++){
+                    newpath[ii] = path[j];
                     // printf("%c", newpath[i]);
                 }
                 print_ls(newpath, flag_a, flag_l);

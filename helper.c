@@ -6,9 +6,20 @@
 #include "ls.h"
 #include "pinfo.h"
 
+void del_process(int id){
+	int flag = 0;
+	for (int ii = 1; ii <= process_count; ii++){
+	  if (jobs[ii].pid == id){
+	    flag = 1;
+	    for (int j = i; j < process_count; j++)
+	      jobs[j] = jobs[j + 1];
+	    process_count--;
+	  }
+	}
+}
+
 void c_shell(){
 
-	
 	getcwd(home_dir, sizeof(home_dir));
 	while(1){
 		// get the command from user
@@ -47,6 +58,9 @@ void c_shell(){
 			}
 			else{
 				printf("%d\n", pid);
+				process_count++;
+				jobs[process_count].pid = pid;
+				strcpy(jobs[process_count].job_name, argv[0]);
 			}
 		}
 	}
@@ -61,6 +75,8 @@ void get_command(){
 	gethostname(hostname, HOST_NAME_MAX);
 	getlogin_r(username, LOGIN_NAME_MAX);
 	getcwd(cwd, sizeof(cwd));
+
+	// printf("PRINTING\n%s\n", cwd);
 
 	int ii;
 	for(ii = 0; ii<strlen(cwd) && ii<strlen(home_dir); ii++){
@@ -160,4 +176,23 @@ void log_handle(int sig){
     if(pFile==NULL) perror("Error opening file.");
     else fprintf(pFile, "[LOG] child proccess terminated.\n");
     fclose(pFile);
+
+
+	for(int ii = 0; ii<=process_count; ii++){
+		int status;
+			pid_t p = waitpid(-1, &status, WNOHANG);
+			if (p < 0){
+	      perror("\nwaitpid failed\n");
+	    }
+	    const int exit = WEXITSTATUS(status);
+	    // printf("%d %d %s %d\n", p, jobs[ii].pid, jobs[ii].job_name, exit);
+	    if ((WIFEXITED(status) && p == jobs[ii].pid)){
+	      if (exit == 0)
+	        printf("\n%s with pid %d exited normally with exit status: %d\n", jobs[ii].job_name, jobs[ii].pid, exit);
+	      else
+	        printf("\n%s with pid %d exited abnormally\n", jobs[ii].job_name, jobs[ii].pid);
+	      del_process(p);
+	    }
+	}
+	get_command();
 }

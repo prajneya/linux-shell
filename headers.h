@@ -19,11 +19,19 @@
 
 #define	MAX_SIZE_CMD	256
 #define	MAX_SIZE_ARG	16
+#define MAX_JOBS 128
+
+struct job{
+	int pid;
+	char job_name[MAX_SIZE_ARG];
+};
 
 extern char cmd[MAX_SIZE_CMD];				// string holder for the command
 extern char *argv[MAX_SIZE_ARG];			// an array for command and arguments
 extern pid_t pid;										// global variable for the child process ID
 extern char i;								// global for loop counter
 extern char home_dir[PATH_MAX];			// global variable for home directory
+extern int process_count;
+extern struct job jobs[MAX_JOBS];
 
 #endif

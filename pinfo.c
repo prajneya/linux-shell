@@ -36,7 +36,7 @@ void print_pinfo(char process_id[]){
     strtok(buffer, " ");
     strtok(NULL, " ");
     char * status = strtok(NULL, " ");
-
+    
     printf("Process status: %s\n", status);
 
     close(fd);
