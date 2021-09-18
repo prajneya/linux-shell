@@ -36,8 +36,15 @@ void print_pinfo(char process_id[]){
     strtok(buffer, " ");
     strtok(NULL, " ");
     char * status = strtok(NULL, " ");
+
+    if(!strcmp(process_id, "self")) {
+        printf("Process status: %s+\n", status);
+    }
+    else {
+        printf("Process status: %s\n", status);
+    }
     
-    printf("Process status: %s\n", status);
+    
 
     close(fd);
 

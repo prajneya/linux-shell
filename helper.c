@@ -5,6 +5,7 @@
 #include "pwd.h"
 #include "ls.h"
 #include "pinfo.h"
+#include "repeat.h"
 
 void del_process(int id){
 	int flag = 0;
@@ -45,15 +46,19 @@ void c_shell(){
 			// int test = execvp(argv[0], argv);
 			// printf("%d", test);
 			// printf("%s", argv[1]);
-			if(!check_command()){
+			if(!check_command(argv)){
 				execvp(argv[0], argv);
 			}
+			// else{
+			// 	exit(0);
+			// }
 
 		}
 		else{
 			// printf("hello from parent\n");
 			// wait for the command to finish if "&" is not present
 			if(argv[i]==NULL){
+				// check_command(argv);
 				waitpid(pid, NULL, 0);
 			}
 			else{
@@ -141,27 +146,31 @@ void convert_command(){
 	//printf("%d\n", i);
 }
 
-int check_command(char cwd[]){
+int check_command(char *cmd[]){
 	// printf("CHECKING COMMAND %s", argv[0]);
-	if(!strcmp(argv[0], "cd")){
+	if(!strcmp(cmd[0], "cd")){
 		char prev_dir[PATH_MAX];
-		change_directory(argv, prev_dir);
+		change_directory(cmd, prev_dir);
 		return 1;
 	}
-	else if(!strcmp(argv[0], "echo")){
-		echo_command(argv);
+	else if(!strcmp(cmd[0], "echo")){
+		echo_command(cmd);
 		return 1;
 	}
-	else if(!strcmp(argv[0], "pwd")){
-		pwd_command(argv);
+	else if(!strcmp(cmd[0], "pwd")){
+		pwd_command(cmd);
 		return 1;
 	}
-	else if(!strcmp(argv[0], "ls")){
-		list_files(argv);
+	else if(!strcmp(cmd[0], "ls")){
+		list_files(cmd);
 		return 1;
 	}
-	else if(!strcmp(argv[0], "pinfo")){
-		pinfo(argv);
+	else if(!strcmp(cmd[0], "pinfo")){
+		pinfo(cmd);
+		return 1;
+	}
+	else if(!strcmp(cmd[0], "repeat")){
+		repeat_command(cmd);
 		return 1;
 	}
 	else{

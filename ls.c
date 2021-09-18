@@ -127,38 +127,64 @@ void list_files(char *argv[]){
         }
 
         arg_index = 1;
-        char path[PATH_MAX] = { '\0' };
+        char *paths[PATH_MAX] = { '\0' };
+        int path_count = 0;
 
         // printf("%ld\n", strlen(path));
         while(argv[arg_index]!=NULL){
             if(strcmp(argv[arg_index], "-l") && strcmp(argv[arg_index], "-a") && strcmp(argv[arg_index], "-al") && strcmp(argv[arg_index], "-la")){
-                for(i = 0; i<strlen(argv[arg_index]); i++){
-                    path[i] = argv[arg_index][i];
-                }
+                paths[path_count] = strdup(argv[arg_index]);
+                path_count++;
                 // printf("\n%s %ld %d", argv[arg_index], strlen(argv[arg_index]), arg_index);
             }
             arg_index++;
         }
 
-        if(strlen(path)!=0){
-            if(path[0]=='~'){
-                char newpath[PATH_MAX];
-                // printf("%s\n", newpath);
-                int ii;
-                for(ii = 0; ii<strlen(home_dir); i++){
-                    newpath[ii] = home_dir[ii];
-                    // printf("%c", newpath[i]);
+        if(path_count!=0){
+            if(path_count==1){
+                if(paths[0][0]=='~'){
+                    char newpath[PATH_MAX];
+                    // printf("%s\n", newpath);
+                    int ii;
+                    for(ii = 0; ii<strlen(home_dir); i++){
+                        newpath[ii] = home_dir[ii];
+                        // printf("%c", newpath[i]);
+                    }
+                    // printf("\n%ld", strlen(path));
+                    for(int j = 1; j<strlen(paths[0]); j++, ii++){
+                        newpath[ii] = paths[0][j];
+                        // printf("%c", newpath[i]);
+                    }
+                    print_ls(newpath, flag_a, flag_l);
                 }
-                // printf("\n%ld", strlen(path));
-                for(int j = 1; j<strlen(path); j++, ii++){
-                    newpath[ii] = path[j];
-                    // printf("%c", newpath[i]);
+                else{
+                    print_ls(paths[0], flag_a, flag_l);
                 }
-                print_ls(newpath, flag_a, flag_l);
             }
             else{
-                print_ls(path, flag_a, flag_l);
-            }    
+                for(int ii = 0; paths[ii]!=NULL; ii++){
+                    printf("%s:\n", paths[ii]);
+                    if(paths[ii][0]=='~'){
+                        char newpath[PATH_MAX];
+                        // printf("%s\n", newpath);
+                        int ii;
+                        for(ii = 0; ii<strlen(home_dir); i++){
+                            newpath[ii] = home_dir[ii];
+                            // printf("%c", newpath[i]);
+                        }
+                        // printf("\n%ld", strlen(path));
+                        for(int j = 1; j<strlen(paths[ii]); j++, ii++){
+                            newpath[ii] = paths[ii][j];
+                            // printf("%c", newpath[i]);
+                        }
+                        print_ls(newpath, flag_a, flag_l);
+                    }
+                    else{
+                        print_ls(paths[ii], flag_a, flag_l);
+                    }
+                    printf("\n");
+                }
+            }  
         }       
         else
             print_ls(".", flag_a, flag_l);
