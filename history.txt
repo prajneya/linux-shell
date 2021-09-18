@@ -1,20 +1,20 @@
+cd - 
+cd - 
+cd shell 
+cd - 
+cd . 
+cd . 
+cd .. 
+cd shell 
+cd - 
+cd - 
+cd - 
+cd - 
 ls 
-ls . 
-ls . .. 
-ls . -l .. -a 
-pinfo 
-pinfo 
-ls 
-ls . 
-ls . .. 
-ls . -l .. -a 
-pinfo 
-pinfo 
-ls 
-echo abcd 
-echo how are you
-ls -l 
-echo try 
-echo 21 
 ls -la 
-pinfo 
+ls -l 
+ls . -l .. -a 
+ls . -la .. 
+echo abc 
+history 
+repeat 2 echo abcd 

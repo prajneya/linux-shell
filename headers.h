@@ -32,7 +32,9 @@ extern char *argv[MAX_SIZE_ARG];			// an array for command and arguments
 extern pid_t pid;										// global variable for the child process ID
 extern char i;								// global for loop counter
 extern char home_dir[PATH_MAX];			// global variable for home directory
+extern char prev_dir[PATH_MAX];
 extern int process_count;
 extern struct job jobs[MAX_JOBS];
+extern int up_history;
 
 #endif

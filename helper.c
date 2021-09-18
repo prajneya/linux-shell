@@ -24,14 +24,19 @@ void c_shell(){
 
 	getcwd(home_dir, sizeof(home_dir));
 	while(1){
+		// printf("LOOPING!\n");
 		// get the command from user
 		get_command(home_dir);
+
 
 		// bypass empty commands
 		if(!strcmp("", cmd)) continue;
 
-		// check for "exit" command
-                if(!strcmp("exit", cmd)) break;
+		//check for "exit" command
+        if(!strcmp("exit", cmd)){
+        	kill(0, SIGKILL);
+        	break;
+        }
 
 		// fit the command into *argv[]
 		convert_command();
@@ -39,6 +44,7 @@ void c_shell(){
 
 		// fork and execute the command
 		pid = fork();
+		// printf("FORKING\n");
 		if(pid < 0){
 			printf("failed to create a child\n");
 		}
@@ -49,11 +55,13 @@ void c_shell(){
 			// printf("%d", test);
 			// printf("%s", argv[1]);
 			if(!check_command(argv)){
-				execvp(argv[0], argv);
+				printf("%d", execvp(argv[0], argv));
 			}
 			// else{
-			// 	exit(0);
+			// 	_exit(0);
 			// }
+			// printf("CHILD EXITING\n");
+			// _exit(0);
 
 		}
 		else{
@@ -69,6 +77,8 @@ void c_shell(){
 				jobs[process_count].pid = pid;
 				strcpy(jobs[process_count].job_name, argv[0]);
 			}
+			// printf("PARENT EXITING\n");
+			// exit(0);
 		}
 	}
 }
@@ -119,6 +129,11 @@ void get_command(){
 		printf("%s@%s:%s>", username, hostname, cwd);
 	}
 
+	// print_history();
+	// up_history++;
+
+	up_history = 0;
+
 	fgets(cmd, MAX_SIZE_CMD, stdin);
 	// remove trailing newline
 	if ((strlen(cmd) > 0) && (cmd[strlen (cmd) - 1] == '\n'))
@@ -151,8 +166,7 @@ void convert_command(){
 int check_command(char *cmd[]){
 	// printf("CHECKING COMMAND %s", argv[0]);
 	if(!strcmp(cmd[0], "cd")){
-		char prev_dir[PATH_MAX];
-		change_directory(cmd, prev_dir);
+		change_directory(cmd);
 		return 1;
 	}
 	else if(!strcmp(cmd[0], "echo")){

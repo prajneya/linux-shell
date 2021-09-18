@@ -3,7 +3,7 @@
 
 void save_command(char *argv[]){
     FILE *fptr;
-    fptr = fopen("history.txt", "a+");
+    fptr = fopen("/home/prajneya/os/shell/history.txt", "a+");
 
     if(fptr == NULL){
       printf("Error in saving history!");   
@@ -33,7 +33,7 @@ void save_command(char *argv[]){
         // printf("MORE THAN 20 HISTORY COMMANDS!\n");
 
         FILE *fptr_temp;
-        fptr_temp = fopen("history_temp.txt", "a+");
+        fptr_temp = fopen("/home/prajneya/os/shell/history_temp.txt", "a+");
 
         if(fptr_temp == NULL){
             printf("Error in saving history!");   
@@ -71,8 +71,8 @@ void save_command(char *argv[]){
             fprintf(fptr_temp,"%s ",argv[ii]);
         fprintf(fptr_temp,"\n");
 
-        remove("history.txt");
-        rename("history_temp.txt", "history.txt");
+        remove("/home/prajneya/os/shell/history.txt");
+        rename("/home/prajneya/os/shell/history_temp.txt", "/home/prajneya/os/shell/history.txt");
 
         fclose(fptr_temp);
     }
@@ -88,22 +88,52 @@ void show_history(char *argv[]){
     int num_commands = 10;
 
     if(argv[1]!=NULL){
-        num_commands = argv[1];
+        sscanf(argv[1], "%d", &num_commands);
+        if(num_commands>10){
+            num_commands = 10;
+        }
     }
 
     FILE *fptr;
-    fptr = fopen("history.txt", "r");
+    fptr = fopen("/home/prajneya/os/shell/history.txt", "r");
 
-    fseek(fpt, 0, SEEK_END);
-    char ch =fgetc(fptr);
-    int commands = 0;
-    while(commands!=num_commands){
-        // printf("A%c", ch);
-        if(ch=='\n')
-            history_count++;
-        ch=fgetc(fptr);
+    char line[MAX_SIZE_ARG];
+
+    int history_count = 0;
+    while(history_count!=num_commands){
+        printf("%d ", history_count+1);
+        fseek(fptr, 0, SEEK_SET);
+        int line_count = 0;
+        while (fgets(line, sizeof line, fptr) != NULL){
+            if (line_count == MAX_HISTORY_COUNT - history_count){
+                printf("%s", line);
+                break;
+            }
+            else{
+                line_count++;
+            }
+        } 
+        history_count++;
     }
+    
 
     fclose(fptr);
 
+}
+
+void print_history(){
+    FILE *fptr;
+    fptr = fopen("/home/prajneya/os/shell/history.txt", "r");
+
+    char line[MAX_SIZE_ARG];
+    int line_count = 0;
+    while (fgets(line, sizeof line, fptr) != NULL){
+        if (line_count == MAX_HISTORY_COUNT - up_history){
+            write(0, line, sizeof(line));
+            break;
+        }
+        else{
+            line_count++;
+        }
+    } 
 }

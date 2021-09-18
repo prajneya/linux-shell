@@ -3,5 +3,6 @@
 
 void save_command(char *argv[]);
 void show_history(char *argv[]);
+void print_history();
 
 #endif

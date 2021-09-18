@@ -1,14 +1,14 @@
 #include "headers.h"
 #include "cd.h"
 
-void change_directory(char *argv[], char prev_dir[]){
+void change_directory(char *argv[]){
     char cwd[PATH_MAX] = { '\0' };
     getcwd(cwd, sizeof(cwd));
     // printf("%s %s\n", cwd, prev_dir);
 
 	if(argv[1]==NULL){
 		printf("No argument for cd provided! Changing directory to HOME!\n");
-        
+         
         if(chdir(home_dir) != 0){
             perror("Error");
         }
