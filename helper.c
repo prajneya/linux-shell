@@ -6,6 +6,7 @@
 #include "ls.h"
 #include "pinfo.h"
 #include "repeat.h"
+#include "history.h"
 
 void del_process(int id){
 	int flag = 0;
@@ -34,6 +35,7 @@ void c_shell(){
 
 		// fit the command into *argv[]
 		convert_command();
+		save_command(argv);
 
 		// fork and execute the command
 		pid = fork();
@@ -171,6 +173,10 @@ int check_command(char *cmd[]){
 	}
 	else if(!strcmp(cmd[0], "repeat")){
 		repeat_command(cmd);
+		return 1;
+	}
+	else if(!strcmp(cmd[0], "history")){
+		show_history(cmd);
 		return 1;
 	}
 	else{

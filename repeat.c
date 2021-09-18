@@ -43,8 +43,6 @@ void repeat_command(char *argv[]){
                 }
             }
             else{
-                // printf("hello from parent\n");
-                // wait for the command to finish if "&" is not present
                 if(argv[i]==NULL){
                     waitpid(pid, NULL, 0);
                 }

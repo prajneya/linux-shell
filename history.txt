@@ -1,0 +1,20 @@
+ls 
+ls . 
+ls . .. 
+ls . -l .. -a 
+pinfo 
+pinfo 
+ls 
+ls . 
+ls . .. 
+ls . -l .. -a 
+pinfo 
+pinfo 
+ls 
+echo abcd 
+echo how are you
+ls -l 
+echo try 
+echo 21 
+ls -la 
+pinfo 

@@ -1,8 +1,6 @@
 #include "headers.h"
 #include "ls.h"
 
-// MULTIPLE DIRECTORY FUNCTINALITY REMAINING
-
 void print_ls(char path[], int flag_a, int flag_l){
     // printf("%s %d %d\n", path, flag_a, flag_l);
     struct dirent *d;

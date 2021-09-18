@@ -20,6 +20,7 @@
 #define	MAX_SIZE_CMD	256
 #define	MAX_SIZE_ARG	16
 #define MAX_JOBS 128
+#define MAX_HISTORY_COUNT 20
 
 struct job{
 	int pid;
