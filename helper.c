@@ -42,43 +42,63 @@ void c_shell(){
 		convert_command();
 		save_command(argv);
 
-		// fork and execute the command
-		pid = fork();
-		// printf("FORKING\n");
-		if(pid < 0){
-			printf("failed to create a child\n");
-		}
-		else if(pid == 0){
-			// printf("hello from child\n");
-			// execute a command
-			// int test = execvp(argv[0], argv);
-			// printf("%d", test);
-			// printf("%s", argv[1]);
-			if(!check_command(argv)){
-				printf("%d", execvp(argv[0], argv));
-			}
-			// else{
-			// 	_exit(0);
-			// }
-			// printf("CHILD EXITING\n");
-			// _exit(0);
+		int check = check_command(argv);
 
-		}
-		else{
-			// printf("hello from parent\n");
-			// wait for the command to finish if "&" is not present
-			if(argv[i]==NULL){
-				// check_command(argv);
-				waitpid(pid, NULL, 0);
+		if(!check){
+			// fork and execute the command
+			pid = fork();
+			// printf("FORKING\n");
+			if(pid < 0){
+				printf("failed to create a child\n");
+			}
+			else if(pid == 0){
+				// printf("hello from child\n");
+				// execute a command
+				// int test = execvp(argv[0], argv);
+				// printf("%d", test);
+				// printf("%s", argv[1]);
+				setpgid(0, 0);
+				int exec_return = execvp(argv[0], argv);
+				if (exec_return < 0) // if invalid command, print its invalid and exit
+        		{
+		            printf("Command \"%s\" not found.\n", argv[0]);
+		            exit(0);
+        		}
+				// else{
+				// 	_exit(0);
+				// }
+				// printf("CHILD EXITING\n");
+				// _exit(0);
+
 			}
 			else{
-				printf("%d\n", pid);
-				process_count++;
-				jobs[process_count].pid = pid;
-				strcpy(jobs[process_count].job_name, argv[0]);
+				// printf("hello from parent\n");
+				// wait for the command to finish if "&" is not present
+				if(argv[i]==NULL){
+					// check_command(argv);
+					// printf("WAITING\n");
+					// waitpid(-1, NULL, WUNTRACED);
+					signal(SIGTTIN, SIG_IGN);
+            		signal(SIGTTOU, SIG_IGN);
+
+					tcsetpgrp(STDIN_FILENO, pid);
+		            int wstatus;
+		            waitpid(-1, &wstatus, WUNTRACED);
+		            tcsetpgrp(STDIN_FILENO, getpgrp());
+
+		            signal(SIGTTIN, SIG_DFL);
+            		signal(SIGTTOU, SIG_DFL);
+				}
+				else{
+					printf("%d\n", pid);
+					process_count++;
+					jobs[process_count].pid = pid;
+					strcpy(jobs[process_count].job_name, argv[0]);
+				}
+				// printf("PARENT EXITING\n");
+				// printf("\n");
+				// exit(0);
 			}
-			// printf("PARENT EXITING\n");
-			// exit(0);
 		}
 	}
 }
@@ -223,5 +243,5 @@ void log_handle(int sig){
 	      del_process(p);
 	    }
 	}
-	get_command();
+	// get_command();
 }
