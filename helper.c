@@ -42,7 +42,7 @@ void c_shell(){
 		convert_command();
 		save_command(argv);
 
-		int check = check_command(argv);
+		int check = check_command(argv, i, 0, 0, "", "");
 
 		if(!check){
 			// fork and execute the command
@@ -183,14 +183,52 @@ void convert_command(){
 	//printf("%d\n", i);
 }
 
-int check_command(char *cmd[]){
-	// printf("CHECKING COMMAND %s", argv[0]);
+int check_command(char *cmd[], int n_args, int output_flag, int input_flag, char* output_path, char *input_path){
+	// printf("CHECKING COMMAND %s", cmd[0]);
+
+	for(int ii = n_args-1; ii>=0; ii--){
+		if(!strcmp(cmd[ii], ">")){
+			char *command_to_run[MAX_SIZE_ARG];
+			int zz = 0;
+			for(zz = 0; zz<ii; zz++){
+				command_to_run[zz] = strdup(cmd[zz]);
+			}
+			command_to_run[zz] = NULL;
+			output_flag = 1;
+
+			check_command(command_to_run, zz, output_flag, input_flag, strdup(cmd[zz+1]), input_path);
+			return 1;
+		}
+		else if(!strcmp(cmd[ii], ">>")){
+			char *command_to_run[MAX_SIZE_ARG];
+			int zz = 0;
+			for(zz = 0; zz<ii; zz++){
+				command_to_run[zz] = strdup(cmd[zz]);
+			}
+			command_to_run[zz] = NULL;
+			output_flag = 2;
+			check_command(command_to_run, zz, output_flag, input_flag, strdup(cmd[zz+1]), input_path);
+			return 1;
+		}
+		else if(!strcmp(cmd[ii], "<")){
+			char *command_to_run[MAX_SIZE_ARG];
+			int zz = 0;
+			for(zz = 0; zz<ii; zz++){
+				command_to_run[zz] = strdup(cmd[zz]);
+			}
+			command_to_run[zz] = NULL;
+			input_flag = 1;
+			check_command(command_to_run, zz, output_flag, input_flag, output_path, strdup(cmd[zz+1]));
+			return 1;
+		}
+	}
+
 	if(!strcmp(cmd[0], "cd")){
 		change_directory(cmd);
 		return 1;
 	}
 	else if(!strcmp(cmd[0], "echo")){
-		echo_command(cmd);
+		echo_command(cmd, output_flag, input_flag, output_path, input_path);
 		return 1;
 	}
 	else if(!strcmp(cmd[0], "pwd")){
@@ -205,14 +243,14 @@ int check_command(char *cmd[]){
 		pinfo(cmd);
 		return 1;
 	}
-	else if(!strcmp(cmd[0], "repeat")){
-		repeat_command(cmd);
-		return 1;
-	}
-	else if(!strcmp(cmd[0], "history")){
-		show_history(cmd);
-		return 1;
-	}
+	// else if(!strcmp(cmd[0], "repeat")){
+	// 	repeat_command(cmd);
+	// 	return 1;
+	// }
+	// else if(!strcmp(cmd[0], "history")){
+	// 	show_history(cmd);
+	// 	return 1;
+	// }
 	else{
 		return 0;
 	}
@@ -241,6 +279,7 @@ void log_handle(int sig){
 	      else
 	        printf("\n%s with pid %d exited abnormally\n", jobs[ii].job_name, jobs[ii].pid);
 	      del_process(p);
+	      get_command();
 	    }
 	}
 	// get_command();

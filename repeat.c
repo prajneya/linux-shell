@@ -31,23 +31,23 @@ void repeat_command(char *argv[]){
         // for(int ii = 0; command_to_run[ii]!=NULL; ii++){
         //     printf("%s ", command_to_run[ii]);
         // }
-        while(loop--){
-            // fork and execute the command
-            pid = fork();
-            if(pid < 0){
-                printf("failed to create a child\n");
-            }
-            else if(pid == 0){
-                if(!check_command(command_to_run)){
-                    execvp(command_to_run[0], command_to_run);
-                }
-            }
-            else{
-                if(argv[i]==NULL){
-                    waitpid(pid, NULL, 0);
-                }
-            }
-        }
+        // while(loop--){
+        //     // fork and execute the command
+        //     pid = fork();
+        //     if(pid < 0){
+        //         printf("failed to create a child\n");
+        //     }
+        //     else if(pid == 0){
+        //         if(!check_command(command_to_run)){
+        //             execvp(command_to_run[0], command_to_run);
+        //         }
+        //     }
+        //     else{
+        //         if(argv[i]==NULL){
+        //             waitpid(pid, NULL, 0);
+        //         }
+        //     }
+        // }
     }
 
 	return;

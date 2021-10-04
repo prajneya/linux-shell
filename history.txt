@@ -1,20 +1,20 @@
-ls 
-sleep 2 
-ls 
-ls 
-sleep 2 
-ls 
-ls 
-sleep 2 
-ls 
-ls 
-ls -la 
-sleep 2 
-ls 
-ls 
-ls 
-ls 
-ls 
-ls 
-ps 
-sleep 2 
+echo abc > abcd 
+echo abcd > abcd 
+echo abc > abcd 
+echo abc > abcd 
+echo abc > abcd 
+echo abc > abcd 
+echo abc > abcd 
+echo abc > abcd 
+echo ab > abcd 
+echo abc > abcd 
+echo abc > abcd 
+echo abcd > abcd 
+echo abcd > abcd 
+echo abcd > derf > and 
+echo abc > abc 
+echo abcd ncnda > output.txt 
+echo abcd ncnda > output.txt 
+echo abcd sfibudf > output.txt 
+echo abcd rgtotjorijt >> output.txt 
+echo abc > abc.txt 
