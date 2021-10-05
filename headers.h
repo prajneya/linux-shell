@@ -37,4 +37,12 @@ extern int process_count;
 extern struct job jobs[MAX_JOBS];
 extern int up_history;
 
+extern int input_flag;
+extern int output_flag;
+extern char input_path[MAX_SIZE_CMD];
+extern char output_path[MAX_SIZE_CMD];
+
+extern int saved_stdout;
+extern int saved_stdin;
+
 #endif

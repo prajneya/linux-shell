@@ -42,7 +42,7 @@ void c_shell(){
 		convert_command();
 		save_command(argv);
 
-		int check = check_command(argv, i, 0, 0, "", "");
+		int check = check_command(argv, i);
 
 		if(!check){
 			// fork and execute the command
@@ -53,31 +53,49 @@ void c_shell(){
 			}
 			else if(pid == 0){
 				// printf("hello from child\n");
-				// execute a command
-				// int test = execvp(argv[0], argv);
-				// printf("%d", test);
-				// printf("%s", argv[1]);
 				setpgid(0, 0);
-				int exec_return = execvp(argv[0], argv);
-				if (exec_return < 0) // if invalid command, print its invalid and exit
-        		{
+				if(output_flag==1){
+					int out_file = open(output_path, O_RDWR|O_CREAT, 0644);
+					if(out_file < 0) perror("Error opening output file.");
+				    int dup_err = dup2(out_file, 1);
+				    if(dup_err<0) perror("Error changing stdout.");
+				    close(out_file);
+				}
+				else if(output_flag==2){
+					int out_file = open(output_path, O_RDWR|O_CREAT|O_APPEND, 0644);
+					if(out_file < 0) perror("Error opening output file.");
+					
+				    int dup_err = dup2(out_file, 1);
+				    if(dup_err<0) perror("Error changing stdout.");
+				    close(out_file);
+				}
+
+				int exec_return;
+				// printf("%d%d\n", output_flag, input_flag);
+				if(input_flag){
+		            int in_file = open(input_path, O_RDONLY);
+		            if(in_file<0) perror("Error opening input file.");
+				    dup2(in_file, 0);
+				    char *file_argv[MAX_SIZE_CMD];
+
+		            file_argv[0] = malloc(MAX_SIZE_ARG);
+		            strcpy(file_argv[0], argv[0]);
+		            file_argv[1] = NULL;
+					exec_return = execvp(argv[0], file_argv);
+				}
+				else{
+					exec_return = execvp(argv[0], argv);
+				}
+				if (exec_return < 0){
 		            printf("Command \"%s\" not found.\n", argv[0]);
 		            exit(0);
         		}
-				// else{
-				// 	_exit(0);
-				// }
-				// printf("CHILD EXITING\n");
-				// _exit(0);
 
 			}
 			else{
 				// printf("hello from parent\n");
 				// wait for the command to finish if "&" is not present
 				if(argv[i]==NULL){
-					// check_command(argv);
-					// printf("WAITING\n");
-					// waitpid(-1, NULL, WUNTRACED);
 					signal(SIGTTIN, SIG_IGN);
             		signal(SIGTTOU, SIG_IGN);
 
@@ -95,15 +113,27 @@ void c_shell(){
 					jobs[process_count].pid = pid;
 					strcpy(jobs[process_count].job_name, argv[0]);
 				}
-				// printf("PARENT EXITING\n");
-				// printf("\n");
-				// exit(0);
 			}
 		}
 	}
 }
 
 void get_command(){
+
+	dup2(saved_stdout, 1);
+	close(saved_stdout);
+
+	dup2(saved_stdin, 0);
+	close(saved_stdin);
+
+	saved_stdout = dup(1);
+	saved_stdin = dup(0);
+
+	input_flag = 0;
+	output_flag = 0;
+	strcpy(input_path, "");
+	strcpy(output_path, "");
+
 	// get command from user
 	// NEED TO ADD ERROR HANDLING
 	char hostname[HOST_NAME_MAX]  = { '\0' };
@@ -183,8 +213,10 @@ void convert_command(){
 	//printf("%d\n", i);
 }
 
-int check_command(char *cmd[], int n_args, int output_flag, int input_flag, char* output_path, char *input_path){
+int check_command(char *cmd[], int n_args){
 	// printf("CHECKING COMMAND %s", cmd[0]);
+
+	int cmd_flag = 0;
 
 	for(int ii = n_args-1; ii>=0; ii--){
 		if(!strcmp(cmd[ii], ">")){
@@ -195,9 +227,10 @@ int check_command(char *cmd[], int n_args, int output_flag, int input_flag, char
 			}
 			command_to_run[zz] = NULL;
 			output_flag = 1;
-
-			check_command(command_to_run, zz, output_flag, input_flag, strdup(cmd[zz+1]), input_path);
-			return 1;
+			strcpy(output_path, strdup(cmd[zz+1]));	
+			check_command(command_to_run, zz);
+			cmd_flag = 1;
+			break;
 		}
 		else if(!strcmp(cmd[ii], ">>")){
 			char *command_to_run[MAX_SIZE_ARG];
@@ -207,8 +240,10 @@ int check_command(char *cmd[], int n_args, int output_flag, int input_flag, char
 			}
 			command_to_run[zz] = NULL;
 			output_flag = 2;
-			check_command(command_to_run, zz, output_flag, input_flag, strdup(cmd[zz+1]), input_path);
-			return 1;
+			strcpy(output_path, strdup(cmd[zz+1]));
+			check_command(command_to_run, zz);
+			cmd_flag = 1;
+			break;
 		}
 		else if(!strcmp(cmd[ii], "<")){
 			char *command_to_run[MAX_SIZE_ARG];
@@ -218,29 +253,36 @@ int check_command(char *cmd[], int n_args, int output_flag, int input_flag, char
 			}
 			command_to_run[zz] = NULL;
 			input_flag = 1;
-			check_command(command_to_run, zz, output_flag, input_flag, output_path, strdup(cmd[zz+1]));
-			return 1;
+			strcpy(input_path, strdup(cmd[zz+1]));
+			check_command(command_to_run, zz);
+			cmd_flag = 1;
+			break;
 		}
 	}
 
 	if(!strcmp(cmd[0], "cd")){
-		change_directory(cmd);
+		if(cmd_flag==0)
+			change_directory(cmd);
 		return 1;
 	}
 	else if(!strcmp(cmd[0], "echo")){
-		echo_command(cmd, output_flag, input_flag, output_path, input_path);
+		if(cmd_flag==0)
+			echo_command(cmd);
 		return 1;
 	}
 	else if(!strcmp(cmd[0], "pwd")){
-		pwd_command(cmd);
+		if(cmd_flag==0)
+			pwd_command(cmd);
 		return 1;
 	}
 	else if(!strcmp(cmd[0], "ls")){
-		list_files(cmd);
+		if(cmd_flag==0)
+			list_files(cmd);
 		return 1;
 	}
 	else if(!strcmp(cmd[0], "pinfo")){
-		pinfo(cmd);
+		if(cmd_flag==0)
+			pinfo(cmd);
 		return 1;
 	}
 	// else if(!strcmp(cmd[0], "repeat")){

@@ -1,20 +1,20 @@
-echo abc > abcd 
-echo abcd > abcd 
-echo abc > abcd 
-echo abc > abcd 
-echo abc > abcd 
-echo abc > abcd 
-echo abc > abcd 
-echo abc > abcd 
-echo ab > abcd 
-echo abc > abcd 
-echo abc > abcd 
-echo abcd > abcd 
-echo abcd > abcd 
-echo abcd > derf > and 
-echo abc > abc 
-echo abcd ncnda > output.txt 
-echo abcd ncnda > output.txt 
-echo abcd sfibudf > output.txt 
-echo abcd rgtotjorijt >> output.txt 
-echo abc > abc.txt 
+sort < output.txt > output3.txt 
+sort < output.txt > output3.txt 
+ls -la 
+sort < output.txt > output2.txt 
+sort < output.txt 
+sort < output.txt > output2.txt 
+sort < output.txt > output2.txt 
+sort < output.txt > output2.txt 
+sort < output.txt > output2.txt 
+sort < output.txt > output2.txt 
+sort < output.txt > output2.txt 
+sort < output.txt > output3.txt 
+sort < output.txt > output2.txt 
+sort < output.txt > output3.txt 
+sort < output.txt > output4.txt 
+sort < output.txt > output4.txt 
+sort < output.txt >> output4.txt 
+sort < output.txt > output2.txt 
+sort < output.txt >> output2.txt 
+git status 
