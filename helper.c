@@ -54,21 +54,6 @@ void c_shell(){
 			else if(pid == 0){
 				// printf("hello from child\n");
 				setpgid(0, 0);
-				if(output_flag==1){
-					int out_file = open(output_path, O_RDWR|O_CREAT, 0644);
-					if(out_file < 0) perror("Error opening output file.");
-				    int dup_err = dup2(out_file, 1);
-				    if(dup_err<0) perror("Error changing stdout.");
-				    close(out_file);
-				}
-				else if(output_flag==2){
-					int out_file = open(output_path, O_RDWR|O_CREAT|O_APPEND, 0644);
-					if(out_file < 0) perror("Error opening output file.");
-					
-				    int dup_err = dup2(out_file, 1);
-				    if(dup_err<0) perror("Error changing stdout.");
-				    close(out_file);
-				}
 
 				int exec_return;
 				// printf("%d%d\n", output_flag, input_flag);
@@ -258,6 +243,22 @@ int check_command(char *cmd[], int n_args){
 			cmd_flag = 1;
 			break;
 		}
+	}
+
+	if(output_flag==1){
+		int out_file = open(output_path, O_RDWR|O_CREAT, 0644);
+		if(out_file < 0) perror("Error opening output file.");
+	    int dup_err = dup2(out_file, 1);
+	    if(dup_err<0) perror("Error changing stdout.");
+	    close(out_file);
+	}
+	else if(output_flag==2){
+		int out_file = open(output_path, O_RDWR|O_CREAT|O_APPEND, 0644);
+		if(out_file < 0) perror("Error opening output file.");
+		
+	    int dup_err = dup2(out_file, 1);
+	    if(dup_err<0) perror("Error changing stdout.");
+	    close(out_file);
 	}
 
 	if(!strcmp(cmd[0], "cd")){
