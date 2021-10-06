@@ -7,6 +7,7 @@
 #include "pinfo.h"
 #include "repeat.h"
 #include "history.h"
+#include "jobs.h"
 
 void del_process(int id){
 	int flag = 0;
@@ -46,6 +47,7 @@ void c_shell(){
 
 		if(!check){
 			// fork and execute the command
+			// printf("FORKING NOW\n");
 			pid = fork();
 			// printf("FORKING\n");
 			if(pid < 0){
@@ -69,6 +71,7 @@ void c_shell(){
 					exec_return = execvp(argv[0], file_argv);
 				}
 				else{
+					// fprintf(stdout, "%s%s%s%s\n", argv[0], argv[1], argv[2], argv[3]);
 					exec_return = execvp(argv[0], argv);
 				}
 				if (exec_return < 0){
@@ -78,7 +81,7 @@ void c_shell(){
 
 			}
 			else{
-				// printf("hello from parent\n");
+				printf("hello from parent\n");
 				// wait for the command to finish if "&" is not present
 				if(argv[i]==NULL){
 					signal(SIGTTIN, SIG_IGN);
@@ -86,7 +89,7 @@ void c_shell(){
 
 					tcsetpgrp(STDIN_FILENO, pid);
 		            int wstatus;
-		            waitpid(-1, &wstatus, WUNTRACED);
+		            waitpid(0, &wstatus, WUNTRACED);
 		            tcsetpgrp(STDIN_FILENO, getpgrp());
 
 		            signal(SIGTTIN, SIG_DFL);
@@ -101,6 +104,7 @@ void c_shell(){
 			}
 		}
 	}
+	return;
 }
 
 void get_command(){
@@ -190,22 +194,30 @@ void convert_command(){
 
 	// check for "&"
 	if(!strcmp("&", argv[i-1])){
-	argv[i-1] = NULL;
-	argv[i] = "&";
-	}else{
-	argv[i] = NULL;
+		argv[i-1] = NULL;
+		argv[i] = "&";
+	}
+	else{
+		argv[i] = NULL;
 	}
 	//printf("%d\n", i);
 }
 
 int check_command(char *cmd[], int n_args){
-	// printf("CHECKING COMMAND %s", cmd[0]);
+	// fprintf(stdout, "CHECKING COMMAND %d\n", n_args);
+
+	// for(int t = 0; t<n_args; t++){
+	// 	fprintf(stdout, "%s ", cmd[t]);
+	// }
+
+	// printf("\n");
 
 	int cmd_flag = 0;
 
-	for(int ii = n_args-1; ii>=0; ii--){
+	for(int ii = n_args-1; ii>=0 && cmd[ii]!=NULL; ii--){
+		// printf("%d %s\n", ii, cmd[ii]);
 		if(!strcmp(cmd[ii], ">")){
-			char *command_to_run[MAX_SIZE_ARG];
+			char *command_to_run[MAX_SIZE_ARG] = { '\0' };
 			int zz = 0;
 			for(zz = 0; zz<ii; zz++){
 				command_to_run[zz] = strdup(cmd[zz]);
@@ -213,12 +225,16 @@ int check_command(char *cmd[], int n_args){
 			command_to_run[zz] = NULL;
 			output_flag = 1;
 			strcpy(output_path, strdup(cmd[zz+1]));	
-			check_command(command_to_run, zz);
+
+			for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';	
+			for( int t = 0; t < zz; t++ ) cmd[t] = strdup(command_to_run[t]);
+
+			check_command(cmd, zz);
 			cmd_flag = 1;
 			break;
 		}
 		else if(!strcmp(cmd[ii], ">>")){
-			char *command_to_run[MAX_SIZE_ARG];
+			char *command_to_run[MAX_SIZE_ARG] = { '\0' };
 			int zz = 0;
 			for(zz = 0; zz<ii; zz++){
 				command_to_run[zz] = strdup(cmd[zz]);
@@ -226,12 +242,16 @@ int check_command(char *cmd[], int n_args){
 			command_to_run[zz] = NULL;
 			output_flag = 2;
 			strcpy(output_path, strdup(cmd[zz+1]));
-			check_command(command_to_run, zz);
+
+			for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
+			for( int t = 0; t < zz; t++ ) cmd[t] = strdup(command_to_run[t]);
+
+			check_command(cmd, zz);
 			cmd_flag = 1;
 			break;
 		}
 		else if(!strcmp(cmd[ii], "<")){
-			char *command_to_run[MAX_SIZE_ARG];
+			char *command_to_run[MAX_SIZE_ARG] = { '\0' };
 			int zz = 0;
 			for(zz = 0; zz<ii; zz++){
 				command_to_run[zz] = strdup(cmd[zz]);
@@ -239,10 +259,96 @@ int check_command(char *cmd[], int n_args){
 			command_to_run[zz] = NULL;
 			input_flag = 1;
 			strcpy(input_path, strdup(cmd[zz+1]));
-			check_command(command_to_run, zz);
+
+			for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
+			for( int t = 0; t < zz; t++ ) cmd[t] = strdup(command_to_run[t]);
+
+			check_command(cmd, zz);
 			cmd_flag = 1;
 			break;
 		}
+		else if(!strcmp(cmd[ii], "|")){
+			printf("avc\n");
+			char *first_pipe[MAX_SIZE_ARG] = { '\0' };
+
+			int zz = 0;
+			for(zz = 0; zz<ii; zz++){
+				first_pipe[zz] = strdup(cmd[zz]);
+			}
+			first_pipe[zz] = NULL;
+			
+			zz+=1;
+
+			char *second_pipe[MAX_SIZE_ARG] = { '\0' };
+			int s_iterator = 0;
+			for(; zz<n_args; zz++){
+				second_pipe[s_iterator] = strdup(cmd[zz]);
+				s_iterator++;
+			}
+			second_pipe[s_iterator+1] = NULL;
+
+			int f_len = ii;
+			int s_len = n_args - f_len - 1;
+
+			int pip_pid;
+
+			pip_pid = fork();
+
+			if(pip_pid < 0){
+				printf("failed to create a child\n");
+			}
+			else if(pip_pid==0){
+				setpgid(0, 0);
+
+				fprintf(stdout, "HELLO FROM CHILD\n");
+				close(file_piper[1]);
+				
+				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
+			    for( int t = 0; t < f_len; t++ ) cmd[t] = strdup(first_pipe[t]);
+
+				int dup_err = dup2(s_file_piper[1], 1);
+				if(dup_err<0) perror("Error changing child stdout.");
+			    
+			    close(s_file_piper[0]);
+
+			    check_command(cmd, f_len);
+
+			    fprintf(stdout, "BYE FROM CHILD\n");
+			}
+			else{
+				fprintf(stdout, "HELLO FROM PARENT\n");
+
+				close(file_piper[0]);
+
+				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
+      			for( int t = 0; t < s_len; t++ ) cmd[t] = strdup(second_pipe[t]);
+
+
+				signal(SIGTTIN, SIG_IGN);
+        		signal(SIGTTOU, SIG_IGN);
+
+				tcsetpgrp(STDIN_FILENO, pip_pid);
+	            int wstatus;
+	            waitpid(-1, &wstatus, WUNTRACED);
+	            tcsetpgrp(STDIN_FILENO, getpgrp());
+
+	            signal(SIGTTIN, SIG_DFL);
+        		signal(SIGTTOU, SIG_DFL);
+
+        		int dup_err = dup2(s_file_piper[0], 0);
+				if(dup_err<0) perror("Error changing parent stdin.");
+
+      			check_command(cmd, s_len);
+
+      			close(s_file_piper[1]);
+      			fprintf(stdout, "BYE FROM PARENT\n");
+
+			}
+
+			cmd_flag = 1;
+			break;
+		}
+		// printf("%d %s\n", ii, cmd[ii]);
 	}
 
 	if(output_flag==1){
@@ -286,6 +392,11 @@ int check_command(char *cmd[], int n_args){
 			pinfo(cmd);
 		return 1;
 	}
+	else if(!strcmp(cmd[0], "jobs")){
+		if(cmd_flag==0)
+			printJobs(cmd);
+		return 1;
+	}
 	// else if(!strcmp(cmd[0], "repeat")){
 	// 	repeat_command(cmd);
 	// 	return 1;
@@ -310,9 +421,10 @@ void log_handle(int sig){
 
 	for(int ii = 0; ii<=process_count; ii++){
 		int status;
-			pid_t p = waitpid(-1, &status, WNOHANG);
-			if (p < 0){
+		pid_t p = waitpid(0, &status, WUNTRACED);
+		if (p < 0){
 	      perror("\nwaitpid failed\n");
+	      get_command();
 	    }
 	    const int exit = WEXITSTATUS(status);
 	    // printf("%d %d %s %d\n", p, jobs[ii].pid, jobs[ii].job_name, exit);

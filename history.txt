@@ -1,20 +1,20 @@
-sort < output.txt 
-sort < output.txt > output2.txt 
-sort < output.txt > output2.txt 
-sort < output.txt > output2.txt 
-sort < output.txt > output2.txt 
-sort < output.txt > output2.txt 
-sort < output.txt > output2.txt 
-sort < output.txt > output3.txt 
-sort < output.txt > output2.txt 
-sort < output.txt > output3.txt 
-sort < output.txt > output4.txt 
-sort < output.txt > output4.txt 
-sort < output.txt >> output4.txt 
-sort < output.txt > output2.txt 
-sort < output.txt >> output2.txt 
-git status 
-echo append >> output.txt 
-echo dance > output4.txt 
-ls -la > output4.txt 
-ls >> output4.txt 
+gedit 
+jobs 
+gedit 
+jobs 
+gedit 
+jobs 
+gedit 
+firefox 
+gedit 
+firefox 
+jobs 
+gedit 
+firefox 
+jobs 
+firefox 
+gedit 
+jobs 
+gedit 
+firefox 
+jobs 

@@ -19,8 +19,12 @@ char output_path[MAX_SIZE_CMD] = { '\0' };
 int saved_stdout = 0;
 int saved_stdin = 0;
 
+int file_piper[2];
+int s_file_piper[2];
 
 int main(){
+	pipe(file_piper);
+	pipe(s_file_piper);
 	// tie the handler to the SGNCHLD signal
 	signal(SIGCHLD, log_handle);
 

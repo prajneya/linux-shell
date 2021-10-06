@@ -21,7 +21,8 @@ void echo_command(char *argv[]){
             fclose(in_file);
             printf("%s ", echo_string);
         }
-		printf("\n");
+        else
+		  printf("\n");
 	}
 	else{
         FILE *pFile;
