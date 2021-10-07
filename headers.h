@@ -46,6 +46,5 @@ extern int saved_stdout;
 extern int saved_stdin;
 
 extern int file_piper[2];
-extern int s_file_piper[2];
 
 #endif

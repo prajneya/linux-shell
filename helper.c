@@ -8,6 +8,8 @@
 #include "repeat.h"
 #include "history.h"
 #include "jobs.h"
+#include "sig.h"
+#include "fg.h"
 
 void del_process(int id){
 	int flag = 0;
@@ -81,7 +83,7 @@ void c_shell(){
 
 			}
 			else{
-				printf("hello from parent\n");
+				// printf("hello from parent\n");
 				// wait for the command to finish if "&" is not present
 				if(argv[i]==NULL){
 					signal(SIGTTIN, SIG_IGN);
@@ -268,7 +270,7 @@ int check_command(char *cmd[], int n_args){
 			break;
 		}
 		else if(!strcmp(cmd[ii], "|")){
-			printf("avc\n");
+			// printf("avc\n");
 			char *first_pipe[MAX_SIZE_ARG] = { '\0' };
 
 			int zz = 0;
@@ -300,48 +302,32 @@ int check_command(char *cmd[], int n_args){
 			else if(pip_pid==0){
 				setpgid(0, 0);
 
-				fprintf(stdout, "HELLO FROM CHILD\n");
-				close(file_piper[1]);
+				// fprintf(stdout, "HELLO FROM CHILD\n");
 				
 				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
 			    for( int t = 0; t < f_len; t++ ) cmd[t] = strdup(first_pipe[t]);
 
-				int dup_err = dup2(s_file_piper[1], 1);
+				int dup_err = dup2(file_piper[1], 1);
 				if(dup_err<0) perror("Error changing child stdout.");
-			    
-			    close(s_file_piper[0]);
 
 			    check_command(cmd, f_len);
 
-			    fprintf(stdout, "BYE FROM CHILD\n");
+			    // fprintf(stdout, "BYE FROM CHILD\n");
 			}
 			else{
-				fprintf(stdout, "HELLO FROM PARENT\n");
-
-				close(file_piper[0]);
+				// fprintf(stdout, "HELLO FROM PARENT\n");
 
 				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
       			for( int t = 0; t < s_len; t++ ) cmd[t] = strdup(second_pipe[t]);
 
-
-				signal(SIGTTIN, SIG_IGN);
-        		signal(SIGTTOU, SIG_IGN);
-
-				tcsetpgrp(STDIN_FILENO, pip_pid);
 	            int wstatus;
 	            waitpid(-1, &wstatus, WUNTRACED);
-	            tcsetpgrp(STDIN_FILENO, getpgrp());
 
-	            signal(SIGTTIN, SIG_DFL);
-        		signal(SIGTTOU, SIG_DFL);
-
-        		int dup_err = dup2(s_file_piper[0], 0);
+        		int dup_err = dup2(file_piper[0], 0);
 				if(dup_err<0) perror("Error changing parent stdin.");
 
       			check_command(cmd, s_len);
-
-      			close(s_file_piper[1]);
-      			fprintf(stdout, "BYE FROM PARENT\n");
+      			// fprintf(stdout, "BYE FROM PARENT\n");
 
 			}
 
@@ -397,6 +383,16 @@ int check_command(char *cmd[], int n_args){
 			printJobs(cmd);
 		return 1;
 	}
+	else if(!strcmp(cmd[0], "sig")){
+		if(cmd_flag==0)
+			sendSig(cmd);
+		return 1;
+	}
+	else if(!strcmp(cmd[0], "fg")){
+		if(cmd_flag==0)
+			fg(cmd);
+		return 1;
+	}
 	// else if(!strcmp(cmd[0], "repeat")){
 	// 	repeat_command(cmd);
 	// 	return 1;
@@ -421,10 +417,10 @@ void log_handle(int sig){
 
 	for(int ii = 0; ii<=process_count; ii++){
 		int status;
-		pid_t p = waitpid(0, &status, WUNTRACED);
+		pid_t p = waitpid(0, &status, WNOHANG);
+
 		if (p < 0){
-	      perror("\nwaitpid failed\n");
-	      get_command();
+			continue;
 	    }
 	    const int exit = WEXITSTATUS(status);
 	    // printf("%d %d %s %d\n", p, jobs[ii].pid, jobs[ii].job_name, exit);

@@ -1,20 +1,20 @@
+ps 
 gedit 
-jobs 
+ps 
 gedit 
-jobs 
+ps 
 gedit 
-jobs 
 gedit 
-firefox 
+ps 
 gedit 
-firefox 
-jobs 
-gedit 
-firefox 
+ps 
 jobs 
 firefox 
-gedit 
-jobs 
-gedit 
 firefox 
 jobs 
+sig 2 9 
+ps 
+jobs 
+gedit 
+jobs 
+fg 1 
