@@ -21,8 +21,13 @@ int saved_stdin = 0;
 
 int file_piper[2];
 
+int piping_flag = 0;
+
 int main(){
 	pipe(file_piper);
+
+	// signal(SIGINT, ctrlcHandler);
+ //    signal(SIGTSTP, ctrlzHandler);
 	// tie the handler to the SGNCHLD signal
 	signal(SIGCHLD, log_handle);
 

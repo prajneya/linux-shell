@@ -13,6 +13,11 @@ void sendSig(char *argv[]){
         int job_num = atoi(argv[1]);
         int sig = atoi(argv[2]);
 
+        if(job_num-1 > process_count || job_num<=0){
+            fprintf(stderr, "NO JOB FOUND\n");
+            return;
+        }
+
         struct job curr = jobs[job_num-1];
 
         if(curr.pid < 0){

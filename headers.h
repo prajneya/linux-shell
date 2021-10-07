@@ -47,4 +47,7 @@ extern int saved_stdin;
 
 extern int file_piper[2];
 
+extern int piping_flag;
+
+
 #endif

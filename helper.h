@@ -6,5 +6,7 @@ void convert_command();						// convert the command string to the required forma
 int check_command(char *cmd[], int n_args);
 void c_shell();								// to start the shell
 void log_handle(int sig);			// signal handler to add log statements
+// void ctrlcHandler(int sig);
+// void ctrlzHandler(int sig);
 
 #endif

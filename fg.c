@@ -9,6 +9,11 @@ void fg(char *argv[]){
     else{
         int job_num = atoi(argv[1]);
 
+        if(job_num-1 > process_count || job_num<=0){
+            fprintf(stderr, "NO JOB FOUND\n");
+            return;
+        }
+
         struct job curr = jobs[job_num-1];
 
         int toFg = curr.pid;

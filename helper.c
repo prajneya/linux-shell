@@ -10,6 +10,7 @@
 #include "jobs.h"
 #include "sig.h"
 #include "fg.h"
+#include "bg.h"
 
 void del_process(int id){
 	int flag = 0;
@@ -49,18 +50,66 @@ void c_shell(){
 
 		if(!check){
 			// fork and execute the command
-			// printf("FORKING NOW\n");
-			pid = fork();
-			// printf("FORKING\n");
-			if(pid < 0){
-				printf("failed to create a child\n");
-			}
-			else if(pid == 0){
-				// printf("hello from child\n");
-				setpgid(0, 0);
+			// printf("TRYING FORKING NOW %d\n", piping_flag);
+			if(!piping_flag){
+				pid = fork();
+				// printf("FORKING\n");
+				if(pid < 0){
+					printf("failed to create a child\n");
+				}
+				else if(pid == 0){
+					// printf("hello from child\n");
+					setpgid(0, 0);
 
+					int exec_return;
+					// printf("%d%d\n", output_flag, input_flag);
+					if(input_flag){
+			            int in_file = open(input_path, O_RDONLY);
+			            if(in_file<0) perror("Error opening input file.");
+					    dup2(in_file, 0);
+					    char *file_argv[MAX_SIZE_CMD];
+
+			            file_argv[0] = malloc(MAX_SIZE_ARG);
+			            strcpy(file_argv[0], argv[0]);
+			            file_argv[1] = NULL;
+						exec_return = execvp(argv[0], file_argv);
+					}
+					else{
+						// fprintf(stdout, "%s%s%s%s\n", argv[0], argv[1], argv[2], argv[3]);
+						exec_return = execvp(argv[0], argv);
+					}
+					if (exec_return < 0){
+			            printf("Command \"%s\" not found.\n", argv[0]);
+			            exit(0);
+	        		}
+
+				}
+				else{
+					// printf("hello from parent\n");
+					// wait for the command to finish if "&" is not present
+					if(argv[i]==NULL){
+						signal(SIGTTIN, SIG_IGN);
+	            		signal(SIGTTOU, SIG_IGN);
+
+						tcsetpgrp(STDIN_FILENO, pid);
+			            int wstatus;
+			            waitpid(-1, &wstatus, WUNTRACED);
+			            tcsetpgrp(STDIN_FILENO, getpgrp());
+
+			            signal(SIGTTIN, SIG_DFL);
+	            		signal(SIGTTOU, SIG_DFL);
+					}
+					else{
+						printf("%d\n", pid);
+						process_count++;
+						jobs[process_count].pid = pid;
+						strcpy(jobs[process_count].job_name, argv[0]);
+					}
+				}
+			}
+			else{
 				int exec_return;
-				// printf("%d%d\n", output_flag, input_flag);
+				// printf("%d%d %s\n", output_flag, input_flag, argv[0]);
 				if(input_flag){
 		            int in_file = open(input_path, O_RDONLY);
 		            if(in_file<0) perror("Error opening input file.");
@@ -73,37 +122,15 @@ void c_shell(){
 					exec_return = execvp(argv[0], file_argv);
 				}
 				else{
-					// fprintf(stdout, "%s%s%s%s\n", argv[0], argv[1], argv[2], argv[3]);
+					// printf("%s%s%s%s\n", argv[0], argv[1], argv[2], argv[3]);
 					exec_return = execvp(argv[0], argv);
 				}
 				if (exec_return < 0){
 		            printf("Command \"%s\" not found.\n", argv[0]);
 		            exit(0);
         		}
-
 			}
-			else{
-				// printf("hello from parent\n");
-				// wait for the command to finish if "&" is not present
-				if(argv[i]==NULL){
-					signal(SIGTTIN, SIG_IGN);
-            		signal(SIGTTOU, SIG_IGN);
-
-					tcsetpgrp(STDIN_FILENO, pid);
-		            int wstatus;
-		            waitpid(0, &wstatus, WUNTRACED);
-		            tcsetpgrp(STDIN_FILENO, getpgrp());
-
-		            signal(SIGTTIN, SIG_DFL);
-            		signal(SIGTTOU, SIG_DFL);
-				}
-				else{
-					printf("%d\n", pid);
-					process_count++;
-					jobs[process_count].pid = pid;
-					strcpy(jobs[process_count].job_name, argv[0]);
-				}
-			}
+			
 		}
 	}
 	return;
@@ -206,10 +233,10 @@ void convert_command(){
 }
 
 int check_command(char *cmd[], int n_args){
-	// fprintf(stdout, "CHECKING COMMAND %d\n", n_args);
+	// printf("CHECKING COMMAND %d\n", n_args);
 
 	// for(int t = 0; t<n_args; t++){
-	// 	fprintf(stdout, "%s ", cmd[t]);
+	// 	printf("%s ", cmd[t]);
 	// }
 
 	// printf("\n");
@@ -271,6 +298,7 @@ int check_command(char *cmd[], int n_args){
 		}
 		else if(!strcmp(cmd[ii], "|")){
 			// printf("avc\n");
+			piping_flag = 1;
 			char *first_pipe[MAX_SIZE_ARG] = { '\0' };
 
 			int zz = 0;
@@ -300,7 +328,7 @@ int check_command(char *cmd[], int n_args){
 				printf("failed to create a child\n");
 			}
 			else if(pip_pid==0){
-				setpgid(0, 0);
+				// setpgid(0, 0);
 
 				// fprintf(stdout, "HELLO FROM CHILD\n");
 				
@@ -320,8 +348,16 @@ int check_command(char *cmd[], int n_args){
 				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
       			for( int t = 0; t < s_len; t++ ) cmd[t] = strdup(second_pipe[t]);
 
+	   //          signal(SIGTTIN, SIG_IGN);
+    //     		signal(SIGTTOU, SIG_IGN);
+
+				// tcsetpgrp(STDIN_FILENO, pid);
 	            int wstatus;
 	            waitpid(-1, &wstatus, WUNTRACED);
+	         //    tcsetpgrp(STDIN_FILENO, getpgrp());
+
+	         //    signal(SIGTTIN, SIG_DFL);
+        		// signal(SIGTTOU, SIG_DFL);
 
         		int dup_err = dup2(file_piper[0], 0);
 				if(dup_err<0) perror("Error changing parent stdin.");
@@ -393,6 +429,11 @@ int check_command(char *cmd[], int n_args){
 			fg(cmd);
 		return 1;
 	}
+	else if(!strcmp(cmd[0], "bg")){
+		if(cmd_flag==0)
+			bg(cmd);
+		return 1;
+	}
 	// else if(!strcmp(cmd[0], "repeat")){
 	// 	repeat_command(cmd);
 	// 	return 1;
@@ -407,31 +448,45 @@ int check_command(char *cmd[], int n_args){
 }
 
 void log_handle(int sig){
-	//printf("[LOG] child proccess terminated.\n");
-	FILE *pFile;
-    pFile = fopen("log.txt", "a");
-    if(pFile==NULL) perror("Error opening file.");
-    else fprintf(pFile, "[LOG] child proccess terminated.\n");
-    fclose(pFile);
 
 
-	for(int ii = 0; ii<=process_count; ii++){
-		int status;
-		pid_t p = waitpid(0, &status, WNOHANG);
+	int status;
 
-		if (p < 0){
-			continue;
-	    }
-	    const int exit = WEXITSTATUS(status);
-	    // printf("%d %d %s %d\n", p, jobs[ii].pid, jobs[ii].job_name, exit);
-	    if ((WIFEXITED(status) && p == jobs[ii].pid)){
-	      if (exit == 0)
-	        printf("\n%s with pid %d exited normally with exit status: %d\n", jobs[ii].job_name, jobs[ii].pid, exit);
-	      else
-	        printf("\n%s with pid %d exited abnormally\n", jobs[ii].job_name, jobs[ii].pid);
-	      del_process(p);
-	      get_command();
-	    }
-	}
-	// get_command();
+    pid_t check_pid = waitpid(-1, &status, WNOHANG);
+
+    if(check_pid > 0) {
+
+        struct job proc = {.pid = check_pid, .job_name = 0};
+
+        for(int ii = 0; ii<=process_count; ii++){
+        	if(jobs[ii].pid==check_pid){
+        		proc = jobs[ii];
+        		break;
+        	}
+        }
+
+        char * procName = proc.pid < 0 ? "Process" : proc.job_name;
+
+        if(WIFEXITED(status) && WEXITSTATUS(status) == EXIT_SUCCESS)
+            fprintf(stderr, "\n%s with pid %d exited normally\n", procName, check_pid);
+        else
+            fprintf(stderr, "\n%s with pid %d exited abnormally\n", procName, check_pid);
+
+        // delete it from the list
+        if(proc.pid >= 0)
+            del_process(check_pid);
+
+        // fflush(stdin);
+        // get_command();
+    }
 }
+
+// void ctrlcHandler(int sig) {
+//     get_command();
+//     fflush(stdout);
+// }
+
+// void ctrlzHandler(int sig) {
+//     get_command();
+//     fflush(stdout);
+// }
