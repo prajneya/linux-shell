@@ -24,7 +24,6 @@ int file_piper[2];
 int piping_flag = 0;
 
 int main(){
-	pipe(file_piper);
 
 	// signal(SIGINT, ctrlcHandler);
  //    signal(SIGTSTP, ctrlzHandler);

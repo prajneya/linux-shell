@@ -53,66 +53,17 @@ void c_shell(){
 
 		if(!check){
 			// fork and execute the command
-			// printf("TRYING FORKING NOW %d\n", piping_flag);
-			if(!piping_flag){
-				pid = fork();
-				// printf("FORKING\n");
-				if(pid < 0){
-					printf("failed to create a child\n");
-				}
-				else if(pid == 0){
-					// printf("hello from child\n");
-					setpgid(0, 0);
-
-					int exec_return;
-					// printf("%d%d\n", output_flag, input_flag);
-					if(input_flag){
-			            int in_file = open(input_path, O_RDONLY);
-			            if(in_file<0) perror("Error opening input file.");
-					    dup2(in_file, 0);
-					    char *file_argv[MAX_SIZE_CMD];
-
-			            file_argv[0] = malloc(MAX_SIZE_ARG);
-			            strcpy(file_argv[0], argv[0]);
-			            file_argv[1] = NULL;
-						exec_return = execvp(argv[0], file_argv);
-					}
-					else{
-						// fprintf(stdout, "%s%s%s%s\n", argv[0], argv[1], argv[2], argv[3]);
-						exec_return = execvp(argv[0], argv);
-					}
-					if (exec_return < 0){
-			            printf("Command \"%s\" not found.\n", argv[0]);
-			            exit(0);
-	        		}
-
-				}
-				else{
-					// printf("hello from parent\n");
-					// wait for the command to finish if "&" is not present
-					if(argv[i]==NULL){
-						signal(SIGTTIN, SIG_IGN);
-	            		signal(SIGTTOU, SIG_IGN);
-
-						tcsetpgrp(STDIN_FILENO, pid);
-			            int wstatus;
-			            waitpid(-1, &wstatus, WUNTRACED);
-			            tcsetpgrp(STDIN_FILENO, getpgrp());
-
-			            signal(SIGTTIN, SIG_DFL);
-	            		signal(SIGTTOU, SIG_DFL);
-					}
-					else{
-						printf("%d\n", pid);
-						process_count++;
-						jobs[process_count].pid = pid;
-						strcpy(jobs[process_count].job_name, argv[0]);
-					}
-				}
+			pid = fork();
+			// printf("FORKING\n");
+			if(pid < 0){
+				printf("failed to create a child\n");
 			}
-			else{
+			else if(pid == 0){
+				// printf("hello from child\n");
+				setpgid(0, 0);
+
 				int exec_return;
-				// printf("%d%d %s\n", output_flag, input_flag, argv[0]);
+				// printf("%d%d\n", output_flag, input_flag);
 				if(input_flag){
 		            int in_file = open(input_path, O_RDONLY);
 		            if(in_file<0) perror("Error opening input file.");
@@ -125,13 +76,40 @@ void c_shell(){
 					exec_return = execvp(argv[0], file_argv);
 				}
 				else{
-					// printf("%s%s%s%s\n", argv[0], argv[1], argv[2], argv[3]);
+					// fprintf(stdout, "%s%s%s%s\n", argv[0], argv[1], argv[2], argv[3]);
 					exec_return = execvp(argv[0], argv);
 				}
 				if (exec_return < 0){
 		            printf("Command \"%s\" not found.\n", argv[0]);
 		            exit(0);
         		}
+
+			}
+			else{
+				// printf("hello from parent\n");
+				// wait for the command to finish if "&" is not present
+				if(argv[i]==NULL){
+					signal(SIGTTIN, SIG_IGN);
+            		signal(SIGTTOU, SIG_IGN);
+
+					tcsetpgrp(STDIN_FILENO, pid);
+		            int wstatus;
+		            waitpid(-1, &wstatus, WUNTRACED);
+		            tcsetpgrp(STDIN_FILENO, getpgrp());
+
+		            signal(SIGTTIN, SIG_DFL);
+            		signal(SIGTTOU, SIG_DFL);
+				}
+				else{
+					printf("%d\n", pid);
+					process_count++;
+					jobs[process_count].pid = pid;
+					strcpy(jobs[process_count].job_name, argv[0]);
+				}
+
+				if(piping_flag){
+					exit(0);
+				}
 			}
 			
 		}
@@ -154,6 +132,8 @@ void get_command(){
 	output_flag = 0;
 	strcpy(input_path, "");
 	strcpy(output_path, "");
+
+	piping_flag = 0;
 
 	// get command from user
 	// NEED TO ADD ERROR HANDLING
@@ -235,6 +215,24 @@ void convert_command(){
 	//printf("%d\n", i);
 }
 
+void change_output(){
+	if(output_flag==1){
+		int out_file = open(output_path, O_RDWR|O_CREAT, 0644);
+		if(out_file < 0) perror("Error opening output file.");
+	    int dup_err = dup2(out_file, 1);
+	    if(dup_err<0) perror("Error changing stdout.");
+	    close(out_file);
+	}
+	else if(output_flag==2){
+		int out_file = open(output_path, O_RDWR|O_CREAT|O_APPEND, 0644);
+		if(out_file < 0) perror("Error opening output file.");
+		
+	    int dup_err = dup2(out_file, 1);
+	    if(dup_err<0) perror("Error changing stdout.");
+	    close(out_file);
+	}
+}
+
 int check_command(char *cmd[], int n_args){
 	// printf("CHECKING COMMAND %d\n", n_args);
 
@@ -261,9 +259,8 @@ int check_command(char *cmd[], int n_args){
 			for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';	
 			for( int t = 0; t < zz; t++ ) cmd[t] = strdup(command_to_run[t]);
 
-			check_command(cmd, zz);
-			cmd_flag = 1;
-			break;
+			change_output();
+			return check_command(cmd, zz);
 		}
 		else if(!strcmp(cmd[ii], ">>")){
 			char *command_to_run[MAX_SIZE_ARG] = { '\0' };
@@ -278,9 +275,8 @@ int check_command(char *cmd[], int n_args){
 			for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
 			for( int t = 0; t < zz; t++ ) cmd[t] = strdup(command_to_run[t]);
 
-			check_command(cmd, zz);
-			cmd_flag = 1;
-			break;
+			change_output();
+			return check_command(cmd, zz);
 		}
 		else if(!strcmp(cmd[ii], "<")){
 			char *command_to_run[MAX_SIZE_ARG] = { '\0' };
@@ -295,9 +291,7 @@ int check_command(char *cmd[], int n_args){
 			for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
 			for( int t = 0; t < zz; t++ ) cmd[t] = strdup(command_to_run[t]);
 
-			check_command(cmd, zz);
-			cmd_flag = 1;
-			break;
+			return check_command(cmd, zz);
 		}
 		else if(!strcmp(cmd[ii], "|")){
 			// printf("avc\n");
@@ -325,15 +319,18 @@ int check_command(char *cmd[], int n_args){
 
 			int pip_pid;
 
+			if (pipe (file_piper)){
+		       fprintf (stderr, "Pipe failed.\n");
+		       exit(0);
+		    }
 			pip_pid = fork();
 
 			if(pip_pid < 0){
 				printf("failed to create a child\n");
 			}
 			else if(pip_pid==0){
-				// setpgid(0, 0);
-
 				// fprintf(stdout, "HELLO FROM CHILD\n");
+				close(file_piper[0]);
 				
 				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
 			    for( int t = 0; t < f_len; t++ ) cmd[t] = strdup(first_pipe[t]);
@@ -341,55 +338,32 @@ int check_command(char *cmd[], int n_args){
 				int dup_err = dup2(file_piper[1], 1);
 				if(dup_err<0) perror("Error changing child stdout.");
 
-			    check_command(cmd, f_len);
+			    return check_command(cmd, f_len);
 
 			    // fprintf(stdout, "BYE FROM CHILD\n");
 			}
 			else{
 				// fprintf(stdout, "HELLO FROM PARENT\n");
+				close(file_piper[1]);
 
 				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
       			for( int t = 0; t < s_len; t++ ) cmd[t] = strdup(second_pipe[t]);
 
-	   //          signal(SIGTTIN, SIG_IGN);
-    //     		signal(SIGTTOU, SIG_IGN);
-
-				// tcsetpgrp(STDIN_FILENO, pid);
 	            int wstatus;
-	            waitpid(-1, &wstatus, WUNTRACED);
-	         //    tcsetpgrp(STDIN_FILENO, getpgrp());
-
-	         //    signal(SIGTTIN, SIG_DFL);
-        		// signal(SIGTTOU, SIG_DFL);
+	            waitpid(-1, &wstatus, WNOHANG);
 
         		int dup_err = dup2(file_piper[0], 0);
 				if(dup_err<0) perror("Error changing parent stdin.");
+				change_output();
 
-      			check_command(cmd, s_len);
+				piping_flag = 0;
+
+      			return check_command(cmd, s_len);
       			// fprintf(stdout, "BYE FROM PARENT\n");
 
 			}
-
-			cmd_flag = 1;
-			break;
 		}
 		// printf("%d %s\n", ii, cmd[ii]);
-	}
-
-	if(output_flag==1){
-		int out_file = open(output_path, O_RDWR|O_CREAT, 0644);
-		if(out_file < 0) perror("Error opening output file.");
-	    int dup_err = dup2(out_file, 1);
-	    if(dup_err<0) perror("Error changing stdout.");
-	    close(out_file);
-	}
-	else if(output_flag==2){
-		int out_file = open(output_path, O_RDWR|O_CREAT|O_APPEND, 0644);
-		if(out_file < 0) perror("Error opening output file.");
-		
-	    int dup_err = dup2(out_file, 1);
-	    if(dup_err<0) perror("Error changing stdout.");
-	    close(out_file);
 	}
 
 	if(!strcmp(cmd[0], "cd")){
@@ -469,6 +443,10 @@ void log_handle(int sig){
         }
 
         char * procName = proc.pid < 0 ? "Process" : proc.job_name;
+
+        if(!strcmp(procName, "")){
+        	return;
+        }
 
         if(WIFEXITED(status) && WEXITSTATUS(status) == EXIT_SUCCESS)
             fprintf(stderr, "\n%s with pid %d exited normally\n", procName, check_pid);

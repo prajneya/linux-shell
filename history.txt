@@ -1,20 +1,20 @@
-gedit 
-jobs 
-gedit 
-JOBS 
-jobs 
-jobs 
-jobs 
-jobs 
-gedit 
-jobs 
-jobs 
-gedit ^ 
-gedit 
-firefox 
-jobs 
-gedit 
-gedit 
-jobs 
-jobs 
-jobs 
+cat < output.txt > lines.txt 
+echo blahblah > lines.txt 
+cat output.txt | head -2 
+ps 
+cat output.txt | head -2 
+ps 
+ps 
+ps 
+ps 
+cat output.txt 
+cat output.txt | tail -2 
+cat output.txt | tail -2 
+ps 
+cat < output.txt | head -2 
+ps 
+cat < output.txt | head -2 
+ps 
+cat < output.txt | head -2 
+cat < output.txt | head -2 
+ps 
