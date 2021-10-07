@@ -40,7 +40,7 @@ void fg(char *argv[]){
         for (int ii = 1; ii <= process_count; ii++){
           if (jobs[ii].pid == toFg){
             flag = 1;
-            for (int j = i; j < process_count; j++)
+            for (int j = ii; j < process_count; j++)
               jobs[j] = jobs[j + 1];
             process_count--;
           }

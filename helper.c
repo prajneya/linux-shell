@@ -17,11 +17,14 @@ void del_process(int id){
 	for (int ii = 1; ii <= process_count; ii++){
 	  if (jobs[ii].pid == id){
 	    flag = 1;
-	    for (int j = i; j < process_count; j++)
+	    for (int j = ii; j < process_count; j++)
 	      jobs[j] = jobs[j + 1];
 	    process_count--;
 	  }
 	}
+	// for (int ii = 1; ii <= process_count; ii++){
+	// 	printf("%d\n", jobs[ii].pid);
+	// }
 }
 
 void c_shell(){
@@ -473,8 +476,10 @@ void log_handle(int sig){
             fprintf(stderr, "\n%s with pid %d exited abnormally\n", procName, check_pid);
 
         // delete it from the list
-        if(proc.pid >= 0)
+        if(check_pid >= 0){
+        	// printf("DELETING PROCESS %d", check_pid);
             del_process(check_pid);
+        }
 
         // fflush(stdin);
         // get_command();

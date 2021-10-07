@@ -1,20 +1,20 @@
 gedit 
-ps 
-sps 
-ps 
 jobs 
 gedit 
-ps 
-sps 
+JOBS 
+jobs 
+jobs 
+jobs 
 jobs 
 gedit 
-ps 
-i 
+jobs 
+jobs 
+gedit ^ 
 gedit 
-i 
+firefox 
+jobs 
 gedit 
-ps 
 gedit 
 jobs 
-sig 1 9 
+jobs 
 jobs 

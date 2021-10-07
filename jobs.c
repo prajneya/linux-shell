@@ -32,8 +32,7 @@ void printJobs(char *argv[]){
         fd = open(buf, O_RDONLY);
 
         if(fd < 0) {
-            fprintf(stderr, "Couldn't find relevant files for pid %d\n", curr.pid);
-            perror("jobs");
+            // fprintf(stderr, "Couldn't find relevant files for pid %d\n", curr.pid);
             continue;
         }
 
@@ -78,7 +77,9 @@ void printJobs(char *argv[]){
 
     qsort(all_jobarr, process_count+1, sizeof(struct job_enlist), job_comparator);
 
-    for(int ii = 0; ii<=process_count; ii++){
+    for(int ii = 1; ii<=process_count; ii++){
+        if(all_jobarr[ii].index == 0)
+            break;
         if(flag_s)
             if(!strcmp(all_jobarr[ii].status, "Stopped"))
                 printf("[%d] %s %s [%d]\n", all_jobarr[ii].index, all_jobarr[ii].status, all_jobarr[ii].job_name, all_jobarr[ii].pid);
