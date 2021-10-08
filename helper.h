@@ -7,7 +7,6 @@ int check_command(char *cmd[], int n_args);
 void c_shell();								// to start the shell
 void log_handle(int sig);			// signal handler to add log statements
 void change_output();
-// void ctrlcHandler(int sig);
-// void ctrlzHandler(int sig);
+void ctrlZHandler();
 
 #endif

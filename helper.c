@@ -41,7 +41,8 @@ void c_shell(){
 
 		//check for "exit" command
         if(!strcmp("exit", cmd)){
-        	kill(0, SIGKILL);
+        	// kill(0, SIGKILL);
+        	exit(0);
         	break;
         }
 
@@ -61,6 +62,9 @@ void c_shell(){
 			else if(pid == 0){
 				// printf("hello from child\n");
 				setpgid(0, 0);
+
+				signal(SIGINT, SIG_DFL);  // restore ctrl+c
+				signal(SIGTSTP, SIG_DFL);  // restore ctrl+z
 
 				int exec_return;
 				// printf("%d%d\n", output_flag, input_flag);
@@ -134,6 +138,12 @@ void get_command(){
 	strcpy(output_path, "");
 
 	piping_flag = 0;
+
+	// disable ctrl+c
+    signal(SIGINT, SIG_IGN);
+    // disable ctrl+z
+    signal(SIGTSTP, SIG_IGN);
+   
 
 	// get command from user
 	// NEED TO ADD ERROR HANDLING
@@ -330,6 +340,10 @@ int check_command(char *cmd[], int n_args){
 			}
 			else if(pip_pid==0){
 				// fprintf(stdout, "HELLO FROM CHILD\n");
+
+				signal(SIGINT, SIG_DFL);  // restore ctrl+c
+        		signal(SIGTSTP, ctrlZHandler); // restore ctrl+z
+
 				close(file_piper[0]);
 				
 				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
@@ -344,6 +358,10 @@ int check_command(char *cmd[], int n_args){
 			}
 			else{
 				// fprintf(stdout, "HELLO FROM PARENT\n");
+
+				signal(SIGINT, SIG_DFL);  // restore ctrl+c
+        		signal(SIGTSTP, ctrlZHandler); // restore ctrl+z
+
 				close(file_piper[1]);
 
 				for( int t = 0; t < n_args; t++ ) cmd[t] = '\0';
@@ -460,16 +478,27 @@ void log_handle(int sig){
         }
 
         // fflush(stdin);
-        // get_command();
+        return;
     }
 }
 
-// void ctrlcHandler(int sig) {
-//     get_command();
-//     fflush(stdout);
-// }
+void ctrlZHandler(int signo){
+	printf("HERE\n");
+	// sigset_t mask;
+	// /* unblock SIGTSTP, since it's blocked because we are handling it */
+ //  	sigemptyset(&mask);
+ //  	sigaddset(&mask, SIGTSTP);
+ //  	sigprocmask(SIG_UNBLOCK, &mask, NULL);
 
-// void ctrlzHandler(int sig) {
-//     get_command();
-//     fflush(stdout);
-// }
+	// pid_t p = getpid();
+
+	// process_count++;
+	// jobs[process_count].pid = p;
+	// strcpy(jobs[process_count].job_name, argv[0]);
+
+	// printf("Stopped %d %s\n", jobs[process_count].pid, jobs[process_count].job_name);
+
+	// signal(SIGTSTP, SIG_DFL);
+	// kill(p, signo);
+	// signal(SIGTSTP, ctrlZHandler);
+}

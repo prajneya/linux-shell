@@ -25,8 +25,10 @@ int piping_flag = 0;
 
 int main(){
 
-	// signal(SIGINT, ctrlcHandler);
- //    signal(SIGTSTP, ctrlzHandler);
+	// disable ctrl+c
+    signal(SIGINT, SIG_IGN);
+    // disable ctrl+z
+    signal(SIGTSTP, SIG_IGN);
 	// tie the handler to the SGNCHLD signal
 	signal(SIGCHLD, log_handle);
 

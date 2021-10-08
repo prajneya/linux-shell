@@ -28,6 +28,7 @@ void printJobs(char *argv[]){
 
     for(int ii = 0; ii<=process_count; ii++){
         struct job curr = jobs[ii];
+        // printf("%d %s", curr.pid, curr.job_name);
         sprintf(buf, "/proc/%d/stat", curr.pid);
         fd = open(buf, O_RDONLY);
 
@@ -77,7 +78,7 @@ void printJobs(char *argv[]){
 
     qsort(all_jobarr, process_count+1, sizeof(struct job_enlist), job_comparator);
 
-    for(int ii = 1; ii<=process_count; ii++){
+    for(int ii = 0; ii<=process_count; ii++){
         if(all_jobarr[ii].index == 0)
             break;
         if(flag_s)
