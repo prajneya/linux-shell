@@ -1,7 +1,3 @@
-firefox 
-firefox 
-sleep 10 
-sleep 20 
 sleep 20 
 jobs 
 jobs 
@@ -18,3 +14,7 @@ firefox
 firefox 
 c 
 firefox 
+sleep 20 
+sleep 4 
+firefox 
+jobs 
