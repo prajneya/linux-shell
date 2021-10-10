@@ -321,7 +321,7 @@ int check_command(char *cmd[], int n_args){
 		}
 		else if(!strcmp(cmd[ii], "|")){
 			// printf("avc\n");
-			piping_flag = 1;
+			piping_flag++;
 			char *first_pipe[MAX_SIZE_ARG] = { '\0' };
 
 			int zz = 0;
@@ -390,7 +390,7 @@ int check_command(char *cmd[], int n_args){
 				if(dup_err<0) perror("Error changing parent stdin.");
 				change_output();
 
-				piping_flag = 0;
+				piping_flag--;
 
       			return check_command(cmd, s_len);
       			// fprintf(stdout, "BYE FROM PARENT\n");

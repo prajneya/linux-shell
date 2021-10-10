@@ -35,6 +35,12 @@ void fg(char *argv[]){
 
         signal(SIGTTIN, SIG_DFL);
         signal(SIGTTOU, SIG_DFL);
+
+        if(WIFSTOPPED(status)){
+            process_count++;
+            jobs[process_count].pid = pid;
+            strcpy(jobs[process_count].job_name, argv[0]);
+        }
         
         int flag = 0;
         for (int ii = 1; ii <= process_count; ii++){

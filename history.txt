@@ -1,20 +1,20 @@
-sleep 20 
+sleep 100 
 jobs 
+fg 2 
 jobs 
-sleep 5 
+sleep 100 
 jobs 
+sleep 100 
 jobs 
-sleep 5 
-pinfo 64974 
-sleep 5 
-sleep 5 
+fg 1 
+jobs 
+sleep 100 
+jobs 
+cat test.txt 
+cat test.txt | wc | wc 
 ps 
-firefox 
-firefox 
-firefox 
-c 
-firefox 
-sleep 20 
-sleep 4 
-firefox 
-jobs 
+cat test.txt | wc | wc 
+cat test.txt | wc | wc 
+ps 
+cat test.txt | wc | wc | wc | wc 
+ps 
