@@ -1,1 +1,0 @@
-[LOG] child proccess terminated.

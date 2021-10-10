@@ -1,8 +1,0 @@
-"hello" 
-"append" 
-total 332
--rw-rw-r--   1 prajneya prajneya        431 Oct 10 12:53 history.txt
--rw-rw-r--   1 prajneya prajneya         75 Oct  5 13:52 echo.h
--rw-rw-r--   1 prajneya prajneya       3312 Sep 18 23:00 history.c
--rw-rw-r--   1 prajneya prajneya     133980 Oct  7 15:03 log.txt
-      8      17      88
